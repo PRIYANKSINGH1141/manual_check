@@ -1,0 +1,100 @@
+name: manual_check
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build_job:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:22.04
+
+    env:
+      APP_NAME: "demo application"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Application
+        run: |
+          echo "Building $APP_NAME..."
+          echo "Docker Image Build Successful" > build.txt
+          cat build.txt
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build_artifact
+          path: build.txt
+
+  build_job2:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Second Build Job
+        run: |
+          echo "this is second build job"
+
+  test_job:
+    needs: build_job
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build_artifact
+          path: .
+
+      - name: Run Tests
+        run: |
+          echo "Testing the application..."
+          cat build.txt
+          echo "Test completed successfully" > test.txt
+          cat test.txt
+
+      - name: Upload Test Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_artifact
+          path: test.txt
+
+  deploy_job:
+    needs: test_job
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Test Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test_artifact
+          path: .
+
+      - name: Deploy Application
+        run: |
+          echo "Deploying..."
+          cat test.txt
+          echo "Deployment successful" > deploy.txt
+          cat deploy.txt
+          echo "Deployment completed"
+
+      - name: Upload Deploy Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy_artifact
+          path: deploy.txt
+              
+     
