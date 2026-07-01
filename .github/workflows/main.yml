@@ -28,18 +28,6 @@ jobs:
           name: build_artifact
           path: build.txt
 
-  build_job2:
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:22.04
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Second Build Job
-        run: |
-          echo "this is second build job"
-
   test_job:
     needs: build_job
     runs-on: ubuntu-latest
